@@ -1,15 +1,18 @@
-const express = 'express';
+const express = require('express');
+const userRoutes = require('./users/userRouter');
 
 const server = express();
 
-server.get('/', (req, res) => {
-  res.send(`<h2>Let's write some middleware!</h2>`)
+server.get('/', logger, (req, res) => {
+  res.send(`INDEX ROUTE IS WORKING`);
 });
 
+server.use('/users', logger, userRoutes);
+
 //custom middleware
-
-function logger(req, res, next) {
-
+function logger(req, res, next) { 
+  console.log(`\n${new Date().toISOString()} ${req.method} ${req.url}\n`);
+  next();
 };
 
 module.exports = server;
