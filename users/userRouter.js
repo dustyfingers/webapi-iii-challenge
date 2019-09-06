@@ -4,7 +4,6 @@ const db = require("./userDb.js");
 const router = express.Router();
 
 router.post("/", async (req, res) => {
-  console.log(req.body);
   try {
     db.insert(req.body);
     let users = await db.get();
@@ -14,7 +13,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-router.post("/:id/posts", (req, res) => {});
+router.post("/:id/posts", validateUserId, (req, res) => {});
 
 router.get("/", async (req, res) => {
   const users = await db.get();
@@ -26,27 +25,28 @@ router.get("/:id", validateUserId, async (req, res) => {
   res.status(200).json({ api: user });
 });
 
-router.get("/:id/posts", async (req, res) => {
+router.get("/:id/posts", validateUserId, async (req, res) => {
   const posts = await db.getUserPosts(req.params.id);
   res.status(200).json({ api: posts });
 });
 
-router.delete("/:id", async (req, res) => {
-  const deleteSuccessful = await db.remove(req.params.id);
-  res.status(200).json({ api: deleteSuccessful });
+router.delete("/:id", validateUserId, async (req, res) => {
+  await db.remove(req.params.id);
+  res.status(200).json({ api: 'user deleted' });
 });
 
-router.put("/:id", (req, res) => {});
+router.put("/:id", validateUserId, (req, res) => {});
 
 //custom middleware
 
 async function validateUserId(req, res, next) {
-  const userId = req.params.id;
-  console.log(userId);
   try {
-    const user = await db.getById(userId);
-    console.log(user);
-    if (user) next(); 
+    const user = await db.getById(req.params.id);
+    if (user) {
+      next();
+    } else {
+      res.status(500).json({ error: 'user does not exist'});
+    }
   } catch (err) {
     console.log(err.message);
   }
