@@ -3,6 +3,8 @@ const userRoutes = require('./users/userRouter');
 
 const server = express();
 
+server.use(express.json());
+
 server.get('/', logger, (req, res) => {
   res.send(`INDEX ROUTE IS WORKING`);
 });
